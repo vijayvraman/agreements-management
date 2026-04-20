@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agreements-management"
+version = "0.1.0"
+description = "Multi-agent legal agreements management system"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "a2a-sdk",
+    "mcp",
+    "langchain-mcp-adapters",
+    "langgraph",
+    "langgraph-supervisor",
+    "langsmith",
+    "langchain-anthropic",
+    "sqlalchemy",
+    "aiosqlite",
+    "pydantic-settings",
+    "python-dotenv",
+    "httpx",
+    "reportlab",
+    "greenlet",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-mock",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
