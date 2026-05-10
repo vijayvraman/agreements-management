@@ -2,8 +2,8 @@
 
 from typing import Annotated, Optional
 
-from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
+from langchain_groq import ChatGroq
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
@@ -26,9 +26,9 @@ def _should_continue(state: QueryState) -> str:
 
 async def build_graph(mcp_tools: list):
     """Build the query specialist graph with the provided MCP tools."""
-    llm = ChatAnthropic(
-        model=settings.llm_model,
-        api_key=settings.anthropic_api_key,
+    llm = ChatGroq(
+        model=settings.specialist_llm_model,
+        api_key=settings.groq_api_key,
     ).bind_tools(mcp_tools)
 
     async def agent_node(state: QueryState) -> dict:

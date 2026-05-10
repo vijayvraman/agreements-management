@@ -44,7 +44,8 @@ Creator Agent          Query Agent          Modifier Agent
 | Agent framework | LangGraph |
 | Agent-to-agent communication | A2A protocol (`a2a-sdk`) |
 | Agent-to-tool communication | MCP protocol (`mcp`, `langchain-mcp-adapters`) |
-| LLM backend | Claude via `langchain-anthropic` |
+| Planner LLM | Claude (`claude-sonnet-4-6`) via `langchain-anthropic` |
+| Specialist LLM | Llama 3.1 8B Instant via Groq (`langchain-groq`) |
 | API server | FastAPI + Uvicorn |
 | Database | SQLAlchemy + SQLite (dev) |
 | Observability | LangSmith (auto-traced) |
@@ -62,7 +63,7 @@ LangGraph `StateGraph` with three nodes:
 Communicates with specialist agents using the **Google A2A protocol** over HTTP.
 
 ### Specialist Agents (×3)
-Each specialist is a standalone service:
+Each specialist is a standalone service running **Llama 3.1 8B Instant** via Groq:
 - **LangGraph graph** — ReAct-style agent loop (agent node → tool node → agent node)
 - **A2A server** — `A2AStarletteApplication` exposing `/.well-known/agent.json` and task endpoints
 - **MCP client** — `MultiServerMCPClient` connects to the relevant MCP servers at startup
@@ -165,7 +166,8 @@ pip install -e .
 ```bash
 cp .env.example .env
 # Fill in:
-#   ANTHROPIC_API_KEY
+#   ANTHROPIC_API_KEY       — planner agent (Claude)
+#   GROQ_API_KEY            — specialist agents (Llama 3.1 8B via Groq)
 #   LANGSMITH_API_KEY
 #   LANGSMITH_PROJECT=agreements-management
 #   LANGSMITH_TRACING=true

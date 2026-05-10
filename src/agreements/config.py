@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     # LLM
     anthropic_api_key: str = ""
+    groq_api_key: str = ""
 
     # LangSmith
     langsmith_tracing: bool = False
@@ -20,8 +21,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "sqlite+aiosqlite:///./agreements.db"
 
-    # LLM model
+    # LLM models — planner uses Claude, specialists use Llama 3.1 8B via Groq
     llm_model: str = "claude-sonnet-4-6"
+    specialist_llm_model: str = "llama-3.1-8b-instant"
 
 
 settings = Settings()

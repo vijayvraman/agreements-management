@@ -1,0 +1,22 @@
+fastapi
+uvicorn[standard]
+a2a-sdk
+mcp
+langchain-mcp-adapters
+langgraph
+langgraph-supervisor
+langsmith
+langchain-anthropic
+langchain-groq
+sqlalchemy
+aiosqlite
+pydantic-settings
+python-dotenv
+httpx
+reportlab
+greenlet
+
+# dev
+pytest
+pytest-asyncio
+pytest-mock

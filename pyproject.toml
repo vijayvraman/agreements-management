@@ -17,6 +17,7 @@ dependencies = [
     "langgraph-supervisor",
     "langsmith",
     "langchain-anthropic",
+    "langchain-groq",
     "sqlalchemy",
     "aiosqlite",
     "pydantic-settings",
