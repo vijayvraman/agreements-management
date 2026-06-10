@@ -145,10 +145,27 @@ agreements-management/
 │       │       └── server.py
 │       ├── a2a/client.py                # Async A2A client (wraps a2a-sdk)
 │       └── main.py                      # FastAPI entry point
-└── tests/
-    ├── test_mcp_servers.py
-    ├── test_specialist_agents.py
-    └── test_planner.py
+├── tests/
+│   ├── test_mcp_servers.py
+│   ├── test_specialist_agents.py
+│   └── test_planner.py
+└── eval/                                # Harvey LAB-style evaluation suite
+    ├── run_eval.py                      # CLI entry point
+    ├── conftest.py                      # pytest fixtures for individual task debugging
+    ├── tasks/
+    │   ├── base.py                      # LABTask, LABRubric, LABEnvironment dataclasses
+    │   ├── create_tasks.py              # 15 creation scenario tasks
+    │   ├── query_tasks.py               # 12 query scenario tasks
+    │   └── modify_tasks.py              # 10 modification scenario tasks
+    ├── harness/
+    │   ├── adapter.py                   # AgreementsAgentAdapter (mock + live modes)
+    │   ├── runner.py                    # Sequential TaskRunner with DB isolation
+    │   └── mock_backend.py              # Inline LangChain tools + specialist graph dispatch
+    ├── evaluator/
+    │   ├── judge.py                     # LLMJudge — batched rubric scoring via Claude
+    │   └── prompts.py                   # RUBRIC_EVALUATION_PROMPT
+    └── metrics/
+        └── reporter.py                  # MetricsReporter, EvalSummary
 ```
 
 ---
@@ -203,6 +220,77 @@ curl -X POST http://localhost:8000/agreements/chat \
 curl -X POST http://localhost:8000/agreements/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "Update agreement abc-123: change status to expired"}'
+```
+
+---
+
+## Evaluation
+
+Harvey LAB-style evaluation pipeline that measures agent quality using structured tasks, expert-written binary rubrics, and an LLM-as-judge scorer. The primary metric is **all-pass rate** — a task passes only when every required rubric passes, mirroring high-stakes legal review.
+
+37 tasks across three intents (15 create, 12 query, 10 modify). The LLM judge (Claude Sonnet 4.6) evaluates all rubrics for a task in a single batched call.
+
+### Run (no servers needed)
+
+```bash
+# Install eval dependency
+pip install -e ".[eval]"
+
+# Quick check — creation tasks only
+python eval/run_eval.py --mode mock --intent create
+
+# Full evaluation with JSON report
+python eval/run_eval.py --mode mock --output eval_results.json
+
+# Filter by intent
+python eval/run_eval.py --mode mock --intent query
+python eval/run_eval.py --mode mock --intent modify
+
+# Stop after first failure
+python eval/run_eval.py --mode mock --fail-fast
+
+# Use a stronger judge model
+python eval/run_eval.py --mode mock --verifier-model claude-opus-4-8
+```
+
+### Run against live servers
+
+```bash
+# Start all 4 servers first, then:
+python eval/run_eval.py --mode live --output eval_live.json
+```
+
+### Debug a single task
+
+```bash
+pytest eval/ -k "create_nda_complete_001" -v
+```
+
+### Output
+
+The console prints a per-task rubric breakdown followed by a summary table:
+
+```
+  [ALL-PASS] create_nda_complete_001
+    ✓ r1: The response explicitly names Acme Corp.
+    ✓ r2: Beta Ltd appears in the response.
+    ...
+
+  AGREEMENTS AGENT EVALUATION — Harvey LAB-style Report
+  ============================================================
+  Total tasks:        37
+  All-pass (primary): 28/37  (75.7%)
+  Partial-pass:        7/37  (18.9%)
+  Zero-pass:           2
+  Errors:              0
+  Mean latency:      4823ms
+  P95 latency:       9201ms
+
+  By intent:
+    create      all-pass=80.0%  (12/15)  errors=0
+    modify      all-pass=70.0%   (7/10)  errors=0
+    query       all-pass=75.0%   (9/12)  errors=0
+  ============================================================
 ```
 
 ---

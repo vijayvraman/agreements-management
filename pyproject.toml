@@ -33,6 +33,9 @@ dev = [
     "pytest-asyncio",
     "pytest-mock",
 ]
+eval = [
+    "anthropic>=0.96.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
